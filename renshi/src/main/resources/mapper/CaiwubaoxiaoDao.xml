@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.CaiwubaoxiaoDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.yonghu_id as yonghuId
+        ,a.caiwubaoxiao_uuid_number as caiwubaoxiaoUuidNumber
+        ,a.caiwubaoxiao_name as caiwubaoxiaoName
+        ,a.caiwubaoxiao_photo as caiwubaoxiaoPhoto
+        ,a.caiwubaoxiao_types as caiwubaoxiaoTypes
+        ,a.insert_time as insertTime
+        ,a.caiwubaoxiao_content as caiwubaoxiaoContent
+        ,a.caiwubaoxiao_yesno_types as caiwubaoxiaoYesnoTypes
+        ,a.caiwubaoxiao_yesno_text as caiwubaoxiaoYesnoText
+        ,a.caiwubaoxiao_shenhe_time as caiwubaoxiaoShenheTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.CaiwubaoxiaoView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.bumen_types as bumenTypes
+        ,yonghu.zhiwu_types as zhiwuTypes
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM caiwubaoxiao  a
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.caiwubaoxiaoUuidNumber != '' and params.caiwubaoxiaoUuidNumber != null and params.caiwubaoxiaoUuidNumber != 'null' ">
+                and a.caiwubaoxiao_uuid_number like CONCAT('%',#{params.caiwubaoxiaoUuidNumber},'%')
+            </if>
+            <if test=" params.caiwubaoxiaoName != '' and params.caiwubaoxiaoName != null and params.caiwubaoxiaoName != 'null' ">
+                and a.caiwubaoxiao_name like CONCAT('%',#{params.caiwubaoxiaoName},'%')
+            </if>
+            <if test="params.caiwubaoxiaoTypes != null and params.caiwubaoxiaoTypes != ''">
+                and a.caiwubaoxiao_types = #{params.caiwubaoxiaoTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test=" params.caiwubaoxiaoContent != '' and params.caiwubaoxiaoContent != null and params.caiwubaoxiaoContent != 'null' ">
+                and a.caiwubaoxiao_content like CONCAT('%',#{params.caiwubaoxiaoContent},'%')
+            </if>
+            <if test="params.caiwubaoxiaoYesnoTypes != null and params.caiwubaoxiaoYesnoTypes != ''">
+                and a.caiwubaoxiao_yesno_types = #{params.caiwubaoxiaoYesnoTypes}
+            </if>
+            <if test=" params.caiwubaoxiaoYesnoText != '' and params.caiwubaoxiaoYesnoText != null and params.caiwubaoxiaoYesnoText != 'null' ">
+                and a.caiwubaoxiao_yesno_text like CONCAT('%',#{params.caiwubaoxiaoYesnoText},'%')
+            </if>
+            <if test=" params.caiwubaoxiaoShenheTimeStart != '' and params.caiwubaoxiaoShenheTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.caiwubaoxiao_shenhe_time) >= UNIX_TIMESTAMP(#{params.caiwubaoxiaoShenheTimeStart}) ]]>
+            </if>
+            <if test=" params.caiwubaoxiaoShenheTimeEnd != '' and params.caiwubaoxiaoShenheTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.caiwubaoxiao_shenhe_time) <= UNIX_TIMESTAMP(#{params.caiwubaoxiaoShenheTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断员工的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test="params.bumenTypes != null  and params.bumenTypes != ''">
+                and yonghu.bumen_types = #{params.bumenTypes}
+            </if>
+
+            <if test="params.zhiwuTypes != null  and params.zhiwuTypes != ''">
+                and yonghu.zhiwu_types = #{params.zhiwuTypes}
+            </if>
+
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
